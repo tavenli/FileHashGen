@@ -13,7 +13,13 @@
 
 当然，本工具也可以用于验证网上下载的各种安装文件是否与官网一致，例如Windows安装镜像、Office等。
 
-开源地址：https://github.com/tavenli/FileHashGen
+
+```
+国际开源地址：https://github.com/tavenli/FileHashGen
+国内开源地址：https://gitee.com/tavenli/FileHashGen
+
+以上两个仓库，都会一起推送。
+```
 
 
 
