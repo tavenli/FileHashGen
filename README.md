@@ -45,6 +45,9 @@ FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
 当前支持的算法有：
 MD5,SHA-1,SHA-256,SHA-512
 
+查看帮助
+FileHashCode.exe -h
+
 如果您需要其它算法，也可以提交 issues 告诉我。
 
 ```
