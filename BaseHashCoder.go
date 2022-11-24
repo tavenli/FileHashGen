@@ -12,6 +12,10 @@ type BaseHashCoder struct {
 	Encoder hash.Hash
 }
 
+func (_self *BaseHashCoder) Name() string {
+	return "-"
+}
+
 func (_self *BaseHashCoder) Create() {
 
 }

@@ -8,6 +8,10 @@ type SHA256Coder struct {
 	BaseHashCoder
 }
 
+func (_self *SHA256Coder) Name() string {
+	return "SHA-256"
+}
+
 func (_self *SHA256Coder) Create() {
 	_self.Encoder = sha256.New()
 	_self.datas = make(chan []byte, 10)

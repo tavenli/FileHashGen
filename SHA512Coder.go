@@ -8,6 +8,10 @@ type SHA512Coder struct {
 	BaseHashCoder
 }
 
+func (_self *SHA512Coder) Name() string {
+	return "SHA-512"
+}
+
 func (_self *SHA512Coder) Create() {
 	_self.Encoder = sha512.New()
 	_self.datas = make(chan []byte, 10)

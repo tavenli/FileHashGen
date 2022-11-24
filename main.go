@@ -2,79 +2,96 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"os"
-	"sync"
+	"path/filepath"
+	"time"
 )
 
 /*
 	支持MD5、SHA-1、SHA-256、SHA-512算法等
 */
 func main() {
-	fmt.Println("Hi Taven.Li")
 
-	filePath := "C:\\Users\\HJKL\\Desktop\\cn_sql_server_2012_enterprise_edition_x86_x64_dvd_813295.iso"
-	//filePath := "C:\\Users\\HJKL\\Desktop\\payload.txt"
-	/*
-		file, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	fmt.Println("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★")
+	fmt.Println("FileHashGen v1.0")
+	fmt.Println("电子数据指纹生成工具")
+	fmt.Println("")
+	fmt.Println("项目地址：")
+	fmt.Println("https://gitee.com/tavenli/FileHashGen")
+	fmt.Println("")
+	fmt.Println("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★")
+
+	workPath, _ := os.Getwd()
+	fmt.Println(workPath)
+
+	//默认从当前目录开始遍历
+	files := walkDirectory(workPath)
+
+	fmt.Println("results count：", len(files))
+	for _, f := range files {
+		fmt.Println("\n文件名：", f.FullPath)
+		for _, h := range f.Hashes {
+			fmt.Println(fmt.Sprint(h.CodeName, "：", h.HashVal))
+		}
+	}
+
+}
+
+//	go不支持三元表达式，可以使用自定义的函数实现
+//	例如：max := If(x > y, x, y).(int)
+func If(condition bool, trueVal, falseVal interface{}) interface{} {
+
+	if condition {
+		return trueVal
+	}
+	return falseVal
+}
+
+// 一行代码计算代码执行时间
+// defer TimeCost(time.Now())
+func TimeCost(start time.Time) {
+	terminal := time.Since(start)
+	fmt.Println("TimeCost：", terminal)
+}
+
+func walkDirectory(toWalk string) []*FileResp {
+	var files []*FileResp
+
+	walkErr := filepath.WalkDir(toWalk, func(curFullPath string, curFile os.DirEntry, err error) error {
 		if err != nil {
-			panic(err.Error())
-		}
-		fi, _ := file.Stat()
-		fsize := fi.Size()
-
-	*/
-
-	//主要是考虑大文件，要并行计算
-
-	wg := new(sync.WaitGroup)
-
-	md5HashCoder := new(Md5Coder)
-	md5HashCoder.Create()
-	md5HashCoder.ReadFromChan(wg)
-
-	sha1HashCoder := new(SHA1Coder)
-	sha1HashCoder.Create()
-	sha1HashCoder.ReadFromChan(wg)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		panic(err.Error())
-	}
-	defer file.Close()
-
-	data := make([]byte, 4_194_304)
-	for {
-		n, err := file.Read(data)
-		if err != nil && err != io.EOF {
-			panic(err.Error())
-			break
+			return err
 		}
 
-		// 需要复制一份，否则goroutines 共同对 data 对象的操作可能出现问题
-		tmp := make([]byte, len(data))
-		copy(tmp, data)
+		//fmt.Println(curFullPath)
+		if !curFile.IsDir() {
+			//是文件，则生成hash
+			fileInfo, _ := curFile.Info()
+			//fmt.Println(fileInfo.Name())
 
-		md5HashCoder.WriteToChan(tmp[:n])
-		sha1HashCoder.WriteToChan(tmp[:n])
+			fileResp := new(FileResp)
+			fileResp.FileName = fileInfo.Name()
+			fileResp.FullPath = curFullPath
 
-		if err == io.EOF {
-			break
+			genHashFile := &GenHashFile{FullPath: curFullPath}
+			genHashFile.LoadAllCoders()
+			results := genHashFile.Generate()
+
+			fileResp.Hashes = results
+
+			files = append(files, fileResp)
 		}
 
+		return nil
+	})
+
+	if walkErr != nil {
+		fmt.Println(walkErr.Error())
 	}
 
-	md5HashCoder.CloseChan()
-	sha1HashCoder.CloseChan()
+	return files
+}
 
-	//需要先关闭通道，然后等待写入全部完成
-	wg.Wait()
+func IgnoreFile(fileName string) bool {
 
-	hash := md5HashCoder.GenHashHex()
-	fmt.Println(hash)
-
-	fmt.Println(sha1HashCoder.GenHashHex())
-
-	fmt.Println("ok")
-
+	return true
 }
