@@ -59,7 +59,8 @@ func (_self *GenHashFile) Generate() []*HashResp {
 }
 
 func (_self *GenHashFile) LoadAllCoders() {
-	_self.LoadCoders(new(Md5Coder), new(SHA1Coder), new(SHA256Coder), new(SHA512Coder))
+	//_self.LoadCoders(new(Md5Coder), new(SHA1Coder), new(SHA256Coder), new(SHA512Coder))
+	_self.LoadCoders(GetAllCoders()...)
 }
 
 func (_self *GenHashFile) LoadCoders(_coders ...HashCoder) {

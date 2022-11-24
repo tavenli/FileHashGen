@@ -23,6 +23,7 @@ func TestDirFiles(t *testing.T) {
 	//
 	path, _ := os.Executable()
 	fmt.Println(path)
+
 	_, exec := filepath.Split(path)
 	fmt.Println(exec)
 

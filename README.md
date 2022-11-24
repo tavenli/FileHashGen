@@ -21,6 +21,25 @@
 以上两个仓库，都会一起推送。
 ```
 
+# 使用说明
+```
+以 Windows 系统下为例
 
+自动生成目录下所有文件的指纹信息，不带任何参数，直接执行（推荐）：
+FileHashCode.exe
 
+指定单个文件：
+FileHashCode.exe -f "d:\检材目录\检材1.docx"
+
+指定文件夹下所有文件：
+FileHashCode.exe -f "d:\检材目录\视频文件\"
+
+生成目录下所有文件，只使用两种算法：
+FileHashCode.exe -c "MD5,SHA-256"
+
+指定一个文件，只使用两种算法：
+FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
+
+注意： -c 参数不指定时，默认所有支持的算法都会生成
+```
 
