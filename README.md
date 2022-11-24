@@ -31,7 +31,7 @@ FileHashCode.exe
 指定单个文件：
 FileHashCode.exe -f "d:\检材目录\检材1.docx"
 
-指定文件夹下所有文件：
+指定文件夹下所有文件（包括多层子文件夹）：
 FileHashCode.exe -f "d:\检材目录\视频文件\"
 
 生成目录下所有文件，只使用两种算法：
