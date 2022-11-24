@@ -6,6 +6,8 @@ import (
 	"sync"
 )
 
+//通用的一个封装类，把具体算法封装在外面，
+//这样算法可以随意增加，不影响这里的逻辑
 type GenHashFile struct {
 	FullPath string
 	WG       *sync.WaitGroup

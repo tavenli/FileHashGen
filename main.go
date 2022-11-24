@@ -12,9 +12,33 @@ import (
 )
 
 var (
-	help       = flag.Bool("h", false, "显示帮助信息")
-	targetFile = flag.String("f", "", "指定文件名 或 目录路径")
-	useCoders  = flag.String("c", "MD5,SHA-1,SHA-256,SHA-512", "指定文件名 或 目录路径")
+	targetFile = flag.String("f", "", "指定具体文件名 或 文件夹路径")
+	useCoders  = flag.String("c", "MD5,SHA-1,SHA-256,SHA-512", "指定需要生成的算法种类，默认为所有算法都计算")
+	helpTxt    = flag.String("helpTxt", "", `以 Windows 系统下为例
+
+自动生成目录下所有文件的指纹信息，不带任何参数，直接执行（推荐）：
+FileHashCode.exe
+
+指定单个文件：
+FileHashCode.exe -f "d:\检材目录\检材1.docx"
+
+指定文件夹下所有文件：
+FileHashCode.exe -f "d:\检材目录\视频文件\"
+
+生成目录下所有文件，只使用两种算法：
+FileHashCode.exe -c "MD5,SHA-256"
+
+指定一个文件，只使用两种算法：
+FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
+
+注意： -c 参数不指定时，默认所有支持的算法都会生成
+
+当前支持的算法有：
+MD5,SHA-1,SHA-256,SHA-512
+
+如果您有更进一步需求，请前往下面地址提交 issues
+https://gitee.com/tavenli/FileHashGen
+`)
 
 	hashCoders  []HashCoder
 	exeFileName = "FileHashGen"
@@ -36,19 +60,8 @@ FileHashGen v1.0
 项目地址：
 https://gitee.com/tavenli/FileHashGen
 
-自动生成目录下所有文件的指纹信息，不带任何参数，直接执行（推荐）：
-FileHashCode.exe
-
-指定单个文件：
-FileHashCode.exe -f "d:\检材目录\检材1.docx"
-
-指定文件夹下所有文件：
-FileHashCode.exe -f "d:\检材目录\视频文件\"
-
-指定算法种类（默认是所有算法都计算）：
-FileHashCode.exe -c "MD5,SHA-256"
-
-FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
+查看使用帮助：
+FileHashCode -h
 
 ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
 	`)
@@ -60,7 +73,7 @@ FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
 
 	exePath, _ := os.Executable()
 	_, exeFileName = filepath.Split(exePath)
-	fmt.Println("exeFileName", exeFileName)
+	//fmt.Println("exeFileName", exeFileName)
 
 	var fRespes []*FileResp
 
@@ -106,18 +119,20 @@ FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
 
 	for _, f := range fRespes {
 		fmt.Println("\n文件名：", f.FullPath)
-		txtStr.WriteString("\n\n\n-----------------------------------------------------")
+
 		txtStr.WriteString(fmt.Sprint("\n\n文件名：", f.FullPath))
 		for _, h := range f.Hashes {
 			fmt.Println(fmt.Sprint(h.CodeName, "：", h.HashVal))
 			txtStr.WriteString(fmt.Sprint("\n", h.CodeName, "：", h.HashVal))
 		}
+
+		txtStr.WriteString("\n-----------------------------------------------------")
 	}
 
-	fmt.Println("文件总数：", len(fRespes))
+	fmt.Println("\n文件总数：", len(fRespes))
 	txtStr.WriteString(fmt.Sprint("\n\n文件总数：", len(fRespes), "\n"))
 
-	reportOutput := fmt.Sprint("FileHash-", time.Now().Format("20060102150405"), ".txt")
+	reportOutput := fmt.Sprint("Hash-", time.Now().Format("20060102150405"), ".txt")
 	_ = ioutil.WriteFile(reportOutput, []byte(txtStr.String()), 0600)
 	fmt.Println("\n\n生成指纹报告文件：" + reportOutput)
 
@@ -193,12 +208,12 @@ func walkDirectory(toWalk string) []*FileResp {
 }
 
 func IgnoreFile(fileName string) bool {
-	fmt.Println("IgnoreFile check：", fileName)
+	//fmt.Println("IgnoreFile check：", fileName)
 	if fileName == exeFileName {
 		return true
 	}
 
-	match, _ := regexp.MatchString("^FileHash-.+\\.txt$", fileName)
+	match, _ := regexp.MatchString("^Hash-.+\\.txt$", fileName)
 	if match {
 		return true
 	}
