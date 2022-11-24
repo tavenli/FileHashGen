@@ -75,6 +75,9 @@ FileHashCode -h
 	_, exeFileName = filepath.Split(exePath)
 	//fmt.Println("exeFileName", exeFileName)
 
+	//计算执行时间
+	start := time.Now()
+
 	var fRespes []*FileResp
 
 	if len(*targetFile) == 0 {
@@ -136,6 +139,12 @@ FileHashCode -h
 	_ = ioutil.WriteFile(reportOutput, []byte(txtStr.String()), 0600)
 	fmt.Println("\n\n生成指纹报告文件：" + reportOutput)
 
+	terminal := time.Since(start)
+	fmt.Println("\nTimeCost：", terminal)
+
+	var tpIn string
+	fmt.Println("\nOK，指纹信息已生成，按 [Enter] 键完成本次任务。")
+	fmt.Scanln(&tpIn)
 }
 
 //	go不支持三元表达式，可以使用自定义的函数实现
