@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -14,6 +13,8 @@ import (
 var (
 	targetFile = flag.String("f", "", "指定具体文件名 或 文件夹路径")
 	useCoders  = flag.String("c", "MD5,SHA-1,SHA-256,SHA-512", "指定需要生成的算法种类，默认为所有算法都计算")
+	reportFile = flag.String("o", "default", "指定生成Hash结果的文件名，默认生成随机文件名")
+	outType    = flag.String("ot", "default", "生成报告文件的内容类型，支持参数 default、only-hash")
 	helpTxt    = flag.String("helpTxt", "", `以 Windows 系统下为例
 
 自动生成目录下所有文件的指纹信息，不带任何参数，直接执行（推荐）：
@@ -36,6 +37,13 @@ FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
 当前支持的算法有：
 MD5,SHA-1,SHA-256,SHA-512
 
+指定输出结果文件的文件名：
+FileHashGen.exe -f test.zip -c “SHA-256” -o report.txt
+
+指定输出结果文件的文件名（内容仅含hash值）：
+FileHashGen.exe -f test.zip -c “SHA-256” -ot "only-hash" -o test.zip.sha256
+
+
 如果您有更进一步需求，请前往下面地址提交 issues
 https://gitee.com/tavenli/FileHashGen
 `)
@@ -45,7 +53,7 @@ https://gitee.com/tavenli/FileHashGen
 )
 
 /*
-	支持MD5、SHA-1、SHA-256、SHA-512算法等
+支持MD5、SHA-1、SHA-256、SHA-512算法等
 */
 func main() {
 
@@ -118,25 +126,20 @@ FileHashCode -h
 	}
 
 	//输出结果
-	var txtStr strings.Builder
+	reportContent := ""
 
-	for _, f := range fRespes {
-		fmt.Println("\n文件名：", f.FullPath)
-
-		txtStr.WriteString(fmt.Sprint("\n\n文件名：", f.FullPath))
-		for _, h := range f.Hashes {
-			fmt.Println(fmt.Sprint(h.CodeName, "：", h.HashVal))
-			txtStr.WriteString(fmt.Sprint("\n", h.CodeName, "：", h.HashVal))
-		}
-
-		txtStr.WriteString("\n-----------------------------------------------------")
+	if *outType == "only-hash" {
+		reportContent = outputResultForOnlyHash(fRespes)
+	} else {
+		reportContent = outputResultForDefault(fRespes)
 	}
 
-	fmt.Println("\n文件总数：", len(fRespes))
-	txtStr.WriteString(fmt.Sprint("\n\n文件总数：", len(fRespes), "\n"))
-
 	reportOutput := fmt.Sprint("Hash-", time.Now().Format("20060102150405"), ".txt")
-	_ = ioutil.WriteFile(reportOutput, []byte(txtStr.String()), 0600)
+	if *reportFile != "default" {
+		reportOutput = *reportFile
+	}
+
+	_ = os.WriteFile(reportOutput, []byte(reportContent), 0600)
 	fmt.Println("\n\n生成指纹报告文件：" + reportOutput)
 
 	terminal := time.Since(start)
@@ -147,8 +150,48 @@ FileHashCode -h
 	fmt.Scanln(&tpIn)
 }
 
-//	go不支持三元表达式，可以使用自定义的函数实现
-//	例如：max := If(x > y, x, y).(int)
+func outputResultForDefault(fRespes []*FileResp) string {
+	var txtStr strings.Builder
+
+	for _, f := range fRespes {
+		fmt.Println("\n文件名：", f.FullPath)
+
+		txtStr.WriteString(fmt.Sprint("\n文件名：", f.FullPath))
+		for _, h := range f.Hashes {
+			fmt.Println(fmt.Sprint(h.CodeName, "：", h.HashVal))
+			txtStr.WriteString(fmt.Sprint("\n", h.CodeName, "：", h.HashVal))
+		}
+
+		txtStr.WriteString("\n-----------------------------------------------------")
+
+	}
+
+	fmt.Println("\n文件总数：", len(fRespes))
+	txtStr.WriteString(fmt.Sprint("\n\n文件总数：", len(fRespes), "\n"))
+
+	return txtStr.String()
+}
+
+func outputResultForOnlyHash(fRespes []*FileResp) string {
+	var txtStr strings.Builder
+
+	for _, f := range fRespes {
+		fmt.Println("\n文件名：", f.FullPath)
+
+		for _, h := range f.Hashes {
+			fmt.Println(fmt.Sprint(h.CodeName, "：", h.HashVal))
+			txtStr.WriteString(fmt.Sprint(h.HashVal, "\n"))
+		}
+
+	}
+
+	fmt.Println("\n文件总数：", len(fRespes))
+
+	return txtStr.String()
+}
+
+// go不支持三元表达式，可以使用自定义的函数实现
+// 例如：max := If(x > y, x, y).(int)
 func If(condition bool, trueVal, falseVal interface{}) interface{} {
 
 	if condition {
@@ -164,7 +207,7 @@ func TimeCost(start time.Time) {
 	fmt.Println("TimeCost：", terminal)
 }
 
-//  判断文件/或文件夹是否存在
+// 判断文件/或文件夹是否存在
 func FileIsExist(name string) bool {
 	var exist = true
 	if _, err := os.Stat(name); os.IsNotExist(err) {

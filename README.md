@@ -45,6 +45,12 @@ FileHashCode.exe -c "MD5,SHA-256" -f "d:\检材目录\检材1.docx"
 当前支持的算法有：
 MD5,SHA-1,SHA-256,SHA-512
 
+指定输出结果文件的文件名：
+FileHashGen.exe -f test.zip -c “SHA-256” -o report.txt
+
+指定输出结果文件的文件名（内容仅含hash值）：
+FileHashGen.exe -f test.zip -c “SHA-256” -ot "only-hash" -o test.zip.sha256
+
 查看帮助
 FileHashCode.exe -h
 
