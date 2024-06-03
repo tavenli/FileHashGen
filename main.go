@@ -62,7 +62,7 @@ func main() {
 
 	fmt.Println(`
 ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-FileHashGen v1.0
+FileHashGen v1.2
 电子数据指纹生成工具
 
 项目地址：
@@ -145,9 +145,9 @@ FileHashCode -h
 	terminal := time.Since(start)
 	fmt.Println("\nTimeCost：", terminal)
 
-	var tpIn string
-	fmt.Println("\nOK，指纹信息已生成，按 [Enter] 键完成本次任务。")
-	fmt.Scanln(&tpIn)
+	//var tpIn string
+	//fmt.Println("\nOK，指纹信息已生成，按 [Enter] 键完成本次任务。")
+	//fmt.Scanln(&tpIn)
 }
 
 func outputResultForDefault(fRespes []*FileResp) string {
